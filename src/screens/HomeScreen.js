@@ -9,6 +9,9 @@ import {
     StatusBar,
     Modal,
     ScrollView,
+    ActivityIndicator,
+    Alert,
+    TextInput,
 } from 'react-native';
 import Animated, {
     useSharedValue,
@@ -29,7 +32,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import * as Linking from 'expo-linking';
-import { COLORS, SPACING, RADIUS, WHATSAPP_NUMBER, GITHUB_APK_URL } from '../constants/theme';
+import * as Haptics from 'expo-haptics';
+import { COLORS, SPACING, RADIUS, WHATSAPP_NUMBER, GITHUB_APK_URL, APP_NAME_FIRST, APP_NAME_LAST, APP_SUBTITLE, PRICE_CONFIG } from '../constants/theme';
+import { calculatePrice, formatPrice } from '../utils/pricing';
 import RequestModal from '../components/RequestModal';
 
 const { width } = Dimensions.get('window');
@@ -40,6 +45,9 @@ export default function HomeScreen() {
     const [priceModalVisible, setPriceModalVisible] = useState(false);
     const [location, setLocation] = useState(null);
     const [locationGranted, setLocationGranted] = useState(false);
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [estimatedKm, setEstimatedKm] = useState('');
 
     // Animations
     const glowScale = useSharedValue(1);
@@ -80,6 +88,7 @@ export default function HomeScreen() {
     }, []);
 
     const requestLocation = async () => {
+        setIsLoadingLocation(true);
         try {
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status === 'granted') {
@@ -89,6 +98,9 @@ export default function HomeScreen() {
             }
         } catch (e) {
             console.log('Location error:', e);
+            Alert.alert('Konum Hatası', 'Konumunuz alınırken bir hata oluştu. Lütfen tekrar deneyin.');
+        } finally {
+            setIsLoadingLocation(false);
         }
     };
 
@@ -117,14 +129,39 @@ export default function HomeScreen() {
         transform: [{ translateY: interpolate(buttonsEnter.value, [0, 1], [40, 0]) }],
     }));
 
-    const handleQRDownload = useCallback(() => {
-        Linking.openURL(GITHUB_APK_URL);
+    const handleQRDownload = useCallback(async () => {
+        if (isProcessing) return;
+        setIsProcessing(true);
+        try {
+            await Linking.openURL(GITHUB_APK_URL);
+        } catch (e) {
+            Alert.alert('Hata', 'Bağlantı açılamadı. Lütfen daha sonra tekrar deneyin.');
+        } finally {
+            setTimeout(() => setIsProcessing(false), 1500);
+        }
+    }, [isProcessing]);
+
+    const handleCall = useCallback(async () => {
+        if (isProcessing) return;
+        setIsProcessing(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        try {
+            await Linking.openURL(`tel:+${WHATSAPP_NUMBER}`);
+            setCallModalVisible(false);
+        } catch (e) {
+            Alert.alert('Arama Hatası', 'Arama başlatılamadı. Lütfen numarayı manuel olarak arayın.');
+            setCallModalVisible(false);
+        } finally {
+            setTimeout(() => setIsProcessing(false), 1500);
+        }
+    }, [isProcessing]);
+
+    const handleHeroPress = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        setModalVisible(true);
     }, []);
 
-    const handleCall = useCallback(() => {
-        Linking.openURL(`tel:+${WHATSAPP_NUMBER}`);
-        setCallModalVisible(false);
-    }, []);
+    const priceEstimate = estimatedKm ? calculatePrice(parseFloat(estimatedKm) || 0) : null;
 
     return (
         <View style={styles.container}>
@@ -138,7 +175,7 @@ export default function HomeScreen() {
             <View style={styles.ambientGlow}>
                 <LinearGradient
                     colors={['rgba(255,215,0,0.08)', 'transparent']}
-                    style={{ width: '100%', height: '100%', borderRadius: width * 0.4 }}
+                    style={styles.ambientGlowGradient}
                 />
             </View>
 
@@ -148,9 +185,13 @@ export default function HomeScreen() {
                     <Animated.View style={[styles.locationPing, pingAnimStyle]} />
                     <View style={[styles.locationDot, { backgroundColor: locationGranted ? COLORS.green : COLORS.gray500 }]} />
                 </View>
-                <Ionicons name="location" size={14} color={COLORS.yellow} />
+                {isLoadingLocation ? (
+                    <ActivityIndicator size="small" color={COLORS.yellow} />
+                ) : (
+                    <Ionicons name="location" size={14} color={COLORS.yellow} />
+                )}
                 <Text style={styles.locationText}>
-                    {locationGranted ? 'Konum Aktif' : 'Konum Kapalı'}
+                    {isLoadingLocation ? 'Konum Alınıyor...' : locationGranted ? 'Konum Aktif' : 'Konum Kapalı'}
                 </Text>
             </Animated.View>
 
@@ -159,11 +200,11 @@ export default function HomeScreen() {
                 {/* Title */}
                 <Animated.View style={[styles.titleContainer, titleAnimStyle]}>
                     <Text style={styles.title}>
-                        AYIK <Text style={styles.titleYellow}>ŞOFÖR</Text>
+                        {APP_NAME_FIRST} <Text style={styles.titleYellow}>{APP_NAME_LAST}</Text>
                     </Text>
                     <View style={styles.subtitleRow}>
                         <View style={styles.subtitleLine} />
-                        <Text style={styles.subtitle}>Premium Şoför Hizmeti</Text>
+                        <Text style={styles.subtitle}>{APP_SUBTITLE}</Text>
                         <View style={styles.subtitleLine} />
                     </View>
                 </Animated.View>
@@ -173,13 +214,13 @@ export default function HomeScreen() {
                     <Animated.View style={[styles.heroGlow, glowAnimStyle]}>
                         <LinearGradient
                             colors={['rgba(255,215,0,0.3)', 'rgba(255,215,0,0.05)', 'transparent']}
-                            style={{ width: '100%', height: '100%', borderRadius: 110 }}
+                            style={styles.heroGlowGradient}
                         />
                     </Animated.View>
                     <TouchableOpacity
                         style={styles.heroButton}
                         activeOpacity={0.8}
-                        onPress={() => setModalVisible(true)}
+                        onPress={handleHeroPress}
                     >
                         <LinearGradient
                             colors={['rgba(255,215,0,0.12)', 'rgba(255,215,0,0.04)']}
@@ -328,8 +369,8 @@ export default function HomeScreen() {
 
                         {/* Header */}
                         <View style={styles.priceModalHeaderRow}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                <View style={{ width: 4, height: 24, backgroundColor: COLORS.yellow, borderRadius: 2 }} />
+                            <View style={styles.priceModalHeaderLeft}>
+                                <View style={styles.priceModalTitleDot} />
                                 <Text style={styles.priceModalTitle}>Fiyat Listesi</Text>
                             </View>
                             <TouchableOpacity
@@ -405,6 +446,44 @@ export default function HomeScreen() {
                                     <Text style={[styles.priceCardAmount, { color: COLORS.yellow, fontSize: 20 }]}>5000 ₺</Text>
                                 </LinearGradient>
                             </Animated.View>
+
+                            {/* Fiyat Hesaplayıcı */}
+                            <Animated.View entering={FadeIn.delay(600).duration(300)} style={styles.priceCalcContainer}>
+                                <View style={styles.priceCalcHeader}>
+                                    <Ionicons name="calculator" size={18} color={COLORS.yellow} />
+                                    <Text style={styles.priceCalcTitle}>Fiyat Hesapla</Text>
+                                </View>
+                                <View style={styles.priceCalcInputRow}>
+                                    <TextInput
+                                        style={styles.priceCalcInput}
+                                        placeholder="KM girin"
+                                        placeholderTextColor={COLORS.gray600}
+                                        keyboardType="numeric"
+                                        value={estimatedKm}
+                                        onChangeText={setEstimatedKm}
+                                    />
+                                    <Text style={styles.priceCalcUnit}>KM</Text>
+                                </View>
+                                {priceEstimate && priceEstimate.total > 0 && (
+                                    <View style={styles.priceCalcResult}>
+                                        <View style={styles.priceCalcBreakdown}>
+                                            <Text style={styles.priceCalcLabel}>Açılış (0-{PRICE_CONFIG.baseKm} KM)</Text>
+                                            <Text style={styles.priceCalcValue}>{formatPrice(priceEstimate.breakdown.base)}</Text>
+                                        </View>
+                                        {priceEstimate.breakdown.extraKm > 0 && (
+                                            <View style={styles.priceCalcBreakdown}>
+                                                <Text style={styles.priceCalcLabel}>+{priceEstimate.breakdown.extraKm} KM × {PRICE_CONFIG.perKm} ₺</Text>
+                                                <Text style={styles.priceCalcValue}>{formatPrice(priceEstimate.breakdown.extraCost)}</Text>
+                                            </View>
+                                        )}
+                                        <View style={styles.priceCalcDivider} />
+                                        <View style={styles.priceCalcBreakdown}>
+                                            <Text style={styles.priceCalcTotalLabel}>Toplam</Text>
+                                            <Text style={styles.priceCalcTotalValue}>{formatPrice(priceEstimate.total)}</Text>
+                                        </View>
+                                    </View>
+                                )}
+                            </Animated.View>
                         </ScrollView>
                     </Animated.View>
                 </View>
@@ -426,6 +505,9 @@ const styles = StyleSheet.create({
         height: width * 0.8,
         borderRadius: width * 0.4,
         opacity: 0.5,
+    },
+    ambientGlowGradient: {
+        width: '100%', height: '100%', borderRadius: width * 0.4,
     },
     locationBadge: {
         position: 'absolute',
@@ -474,6 +556,9 @@ const styles = StyleSheet.create({
     },
     heroGlow: {
         position: 'absolute', width: 220, height: 220, borderRadius: 110,
+    },
+    heroGlowGradient: {
+        width: '100%', height: '100%', borderRadius: 110,
     },
     heroButton: {
         width: 170, height: 170, borderRadius: 85,
@@ -590,6 +675,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
         paddingHorizontal: 20, paddingTop: 18, paddingBottom: 14,
     },
+    priceModalHeaderLeft: {
+        flexDirection: 'row', alignItems: 'center', gap: 10,
+    },
+    priceModalTitleDot: {
+        width: 4, height: 24, backgroundColor: COLORS.yellow, borderRadius: 2,
+    },
     priceModalTitle: { fontSize: 20, fontWeight: '700', color: COLORS.white },
     priceModalCloseBtn: {
         padding: 8, borderRadius: RADIUS.full,
@@ -617,4 +708,62 @@ const styles = StyleSheet.create({
     priceCardTitle: { fontSize: 15, fontWeight: '700', color: COLORS.white, marginBottom: 2 },
     priceCardDesc: { fontSize: 12, color: COLORS.gray400 },
     priceCardAmount: { fontSize: 18, fontWeight: '800', color: COLORS.white },
+    // Price Calculator
+    priceCalcContainer: {
+        marginTop: 6,
+        backgroundColor: 'rgba(255,215,0,0.06)',
+        borderRadius: RADIUS.lg,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(255,215,0,0.15)',
+    },
+    priceCalcHeader: {
+        flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
+    },
+    priceCalcTitle: {
+        fontSize: 15, fontWeight: '700', color: COLORS.yellow,
+    },
+    priceCalcInputRow: {
+        flexDirection: 'row', alignItems: 'center', gap: 10,
+    },
+    priceCalcInput: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        borderRadius: RADIUS.md,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        color: COLORS.white,
+        fontSize: 16,
+        fontWeight: '600',
+        borderWidth: 1,
+        borderColor: COLORS.gray800,
+    },
+    priceCalcUnit: {
+        fontSize: 14, fontWeight: '700', color: COLORS.gray400, letterSpacing: 1,
+    },
+    priceCalcResult: {
+        marginTop: 12,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        borderRadius: RADIUS.md,
+        padding: 12,
+        gap: 6,
+    },
+    priceCalcBreakdown: {
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    },
+    priceCalcLabel: {
+        fontSize: 13, color: COLORS.gray400,
+    },
+    priceCalcValue: {
+        fontSize: 13, fontWeight: '600', color: COLORS.gray300,
+    },
+    priceCalcDivider: {
+        height: 1, backgroundColor: COLORS.gray800, marginVertical: 4,
+    },
+    priceCalcTotalLabel: {
+        fontSize: 15, fontWeight: '700', color: COLORS.white,
+    },
+    priceCalcTotalValue: {
+        fontSize: 18, fontWeight: '800', color: COLORS.yellow,
+    },
 });

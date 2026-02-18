@@ -12,11 +12,13 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
     Alert,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, SPACING, RADIUS, WHATSAPP_NUMBER } from '../constants/theme';
+import * as Haptics from 'expo-haptics';
+import { COLORS, SPACING, RADIUS, WHATSAPP_NUMBER, APP_NAME } from '../constants/theme';
 
 const VEHICLE_OPTIONS = ['Sedan', 'SUV', 'Minivan', 'Lüks Araç'];
 
@@ -28,16 +30,21 @@ export default function RequestModal({ visible, onClose, location }) {
         description: '',
     });
     const [vehicleDropdownOpen, setVehicleDropdownOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const updateField = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        if (isSubmitting) return;
         if (!formData.name.trim()) {
             Alert.alert('Eksik Bilgi', 'Lütfen adınızı ve soyadınızı giriniz.');
             return;
         }
+
+        setIsSubmitting(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
         const locationString =
             location?.latitude && location?.longitude
@@ -45,7 +52,7 @@ export default function RequestModal({ visible, onClose, location }) {
                 : '📍 Konum: Bilinmiyor (İzin verilmedi)';
 
         const message =
-            `*AYIK ŞOFÖR TALEP FORMU* 🚖\n\n` +
+            `*${APP_NAME} TALEP FORMU* 🚖\n\n` +
             `👤 Müşteri: ${formData.name}\n` +
             `🚗 Araç Tipi: ${formData.vehicle}\n` +
             `👥 Kişi Sayısı: ${formData.passengers}\n` +
@@ -55,8 +62,14 @@ export default function RequestModal({ visible, onClose, location }) {
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
 
-        Linking.openURL(whatsappUrl);
-        onClose();
+        try {
+            await Linking.openURL(whatsappUrl);
+            onClose();
+        } catch (e) {
+            Alert.alert('Hata', 'WhatsApp açılamadı. Lütfen WhatsApp uygulamasının yüklü olduğundan emin olun.');
+        } finally {
+            setTimeout(() => setIsSubmitting(false), 1500);
+        }
     };
 
     return (
@@ -183,15 +196,19 @@ export default function RequestModal({ visible, onClose, location }) {
                         </View>
 
                         {/* Submit Button */}
-                        <TouchableOpacity style={styles.submitButton} activeOpacity={0.8} onPress={handleSubmit}>
+                        <TouchableOpacity style={[styles.submitButton, isSubmitting && { opacity: 0.6 }]} activeOpacity={0.8} onPress={handleSubmit} disabled={isSubmitting}>
                             <LinearGradient
                                 colors={[COLORS.yellow, COLORS.accent]}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
                                 style={styles.submitGradient}
                             >
-                                <Ionicons name="send" size={20} color={COLORS.black} />
-                                <Text style={styles.submitText}>WHATSAPP İLE GÖNDER</Text>
+                                {isSubmitting ? (
+                                    <ActivityIndicator size="small" color={COLORS.black} />
+                                ) : (
+                                    <Ionicons name="send" size={20} color={COLORS.black} />
+                                )}
+                                <Text style={styles.submitText}>{isSubmitting ? 'GÖNDERİLİYOR...' : 'WHATSAPP İLE GÖNDER'}</Text>
                             </LinearGradient>
                         </TouchableOpacity>
 

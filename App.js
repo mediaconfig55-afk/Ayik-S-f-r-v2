@@ -1,12 +1,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, StyleSheet, StatusBar, ActivityIndicator } from 'react-native';
 import 'react-native-reanimated';
+import * as ExpoSplashScreen from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './src/screens/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import PermissionScreen from './src/screens/PermissionScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import { COLORS } from './src/constants/theme';
+
+// Native splash'ı uygulama hazır olana kadar tut
+ExpoSplashScreen.preventAutoHideAsync();
 
 const SCREENS = {
   LOADING: 'loading',
@@ -28,14 +32,12 @@ export default function App() {
   const checkOnboardingStatus = async () => {
     try {
       const value = await AsyncStorage.getItem(STORAGE_KEY);
-      if (value === 'true') {
-        // Already onboarded, show splash then go to home
-        setCurrentScreen(SCREENS.SPLASH);
-      } else {
-        setCurrentScreen(SCREENS.SPLASH);
-      }
+      setCurrentScreen(SCREENS.SPLASH);
     } catch (e) {
       setCurrentScreen(SCREENS.SPLASH);
+    } finally {
+      // Native splash'ı gizle, custom splash gösterilmeye başlasın
+      await ExpoSplashScreen.hideAsync();
     }
   };
 

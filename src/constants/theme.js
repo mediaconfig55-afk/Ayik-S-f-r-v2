@@ -46,4 +46,17 @@ export const FONTS = {
 
 export const WHATSAPP_NUMBER = '905442946570';
 export const APP_NAME = 'AYIK ŞOFÖR';
+export const APP_NAME_FIRST = 'AYIK';
+export const APP_NAME_LAST = 'ŞOFÖR';
+export const APP_SUBTITLE = 'Premium Şoför Hizmeti';
 export const GITHUB_APK_URL = 'https://github.com/mediaconfig55-afk/ayik-sofor-app/releases';
+
+export const PRICE_CONFIG = {
+    base: 500,        // 0-5 KM açılış ücreti (₺)
+    baseKm: 5,        // Açılış KM limiti
+    perKm: 100,       // KM başı ücret (5 KM sonrası)
+    waiting: 250,     // Saat başı bekleme (₺)
+    premium: 1400,    // Premium hizmet (₺)
+    premiumKm: 15,    // Premium KM
+    vip: 5000,        // VIP hizmet (₺)
+};

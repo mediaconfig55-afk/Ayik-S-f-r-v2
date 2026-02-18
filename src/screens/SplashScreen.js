@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../constants/theme';
+import { COLORS, APP_NAME_FIRST, APP_NAME_LAST, APP_SUBTITLE } from '../constants/theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -126,11 +126,11 @@ export default function SplashScreen({ onFinish }) {
             {/* Title */}
             <Animated.View style={[styles.textContainer, textAnimStyle]}>
                 <Text style={styles.title}>
-                    AYIK <Text style={styles.titleAccent}>ŞOFÖR</Text>
+                    {APP_NAME_FIRST} <Text style={styles.titleAccent}>{APP_NAME_LAST}</Text>
                 </Text>
                 <View style={styles.subtitleRow}>
                     <View style={styles.subtitleLine} />
-                    <Text style={styles.subtitle}>Premium Şoför Hizmeti</Text>
+                    <Text style={styles.subtitle}>{APP_SUBTITLE}</Text>
                     <View style={styles.subtitleLine} />
                 </View>
             </Animated.View>
