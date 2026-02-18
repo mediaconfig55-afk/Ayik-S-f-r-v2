@@ -38,4 +38,9 @@ yarn-error.*
 
 # generated native folders
 /ios
-/android
+# /android (Un-ignored to track build.gradle changes)
+android/gradle.properties
+
+# Security
+credentials.json
+*.keystore
