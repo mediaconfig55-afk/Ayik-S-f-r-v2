@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, APP_NAME_FIRST, APP_NAME_LAST, APP_SUBTITLE } from '../constants/theme';
 
-const { width, height } = Dimensions.get('window');
+
 
 export default function SplashScreen({ onFinish }) {
     const iconScale = useSharedValue(0);

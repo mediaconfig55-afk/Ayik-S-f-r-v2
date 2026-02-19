@@ -16,10 +16,7 @@ import Animated, {
     withRepeat,
     withTiming,
     withSequence,
-    withSpring,
-    withDelay,
     Easing,
-    interpolate,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';

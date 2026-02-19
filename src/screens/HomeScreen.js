@@ -277,6 +277,15 @@ export default function HomeScreen() {
                 </Animated.View>
             </View>
 
+            {/* About & Privacy Link */}
+            <TouchableOpacity
+                style={styles.aboutButton}
+                activeOpacity={0.7}
+                onPress={() => Linking.openURL('https://mediaconfig55-afk.github.io/Hakk-mda/')}
+            >
+                <Text style={styles.aboutButtonText}>Hakkında & Gizlilik</Text>
+            </TouchableOpacity>
+
             {/* Footer */}
             <Text style={styles.footer}>v1.0.0 • 2026</Text>
 
@@ -401,7 +410,7 @@ export default function HomeScreen() {
                                 </LinearGradient>
                                 <View style={styles.priceCardCenter}>
                                     <Text style={styles.priceCardTitle}>Şehir İçi</Text>
-                                    <Text style={styles.priceCardDesc}>4 KM Sonrası</Text>
+                                    <Text style={styles.priceCardDesc}>5 KM Sonrası</Text>
                                 </View>
                                 <Text style={styles.priceCardAmount}>+ 100 ₺</Text>
                             </Animated.View>
@@ -607,6 +616,17 @@ const styles = StyleSheet.create({
     actionButtonText: {
         fontSize: 11, color: COLORS.gray300, fontWeight: '700', letterSpacing: 1,
     },
+    aboutButton: {
+        marginBottom: 8,
+        padding: 8,
+        alignSelf: 'center',
+    },
+    aboutButtonText: {
+        fontSize: 11,
+        color: COLORS.gray500,
+        textDecorationLine: 'underline',
+        fontWeight: '500',
+    },
     footer: {
         textAlign: 'center', fontSize: 10, color: COLORS.gray600,
         paddingBottom: Platform.OS === 'android' ? 64 : 32,
@@ -664,7 +684,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#151515',
         borderTopLeftRadius: 28, borderTopRightRadius: 28,
         paddingBottom: Platform.OS === 'android' ? 64 : 40,
-        maxHeight: '70%',
+        maxHeight: '92%',
         borderWidth: 1, borderColor: 'rgba(255,215,0,0.15)',
         borderBottomWidth: 0,
     },
@@ -673,7 +693,7 @@ const styles = StyleSheet.create({
     },
     priceModalHeaderRow: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 20, paddingTop: 18, paddingBottom: 14,
+        paddingHorizontal: 20, paddingTop: 12, paddingBottom: 10,
     },
     priceModalHeaderLeft: {
         flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -687,21 +707,21 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.05)',
     },
     priceScrollContent: {
-        paddingHorizontal: 20, paddingBottom: 8, gap: 10,
+        paddingHorizontal: 20, paddingBottom: 16, gap: 8,
     },
     priceCard: {
         flexDirection: 'row', alignItems: 'center',
         backgroundColor: 'rgba(26,26,26,0.8)',
-        borderRadius: RADIUS.lg, padding: 16,
-        borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', gap: 14,
+        borderRadius: RADIUS.lg, padding: 12,
+        borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', gap: 12,
     },
     priceCardVIP: {
         flexDirection: 'row', alignItems: 'center',
-        borderRadius: RADIUS.lg, padding: 16,
-        borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)', gap: 14,
+        borderRadius: RADIUS.lg, padding: 12,
+        borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)', gap: 12,
     },
     priceCardIcon: {
-        width: 48, height: 48, borderRadius: 24,
+        width: 42, height: 42, borderRadius: 21,
         alignItems: 'center', justifyContent: 'center',
     },
     priceCardCenter: { flex: 1 },
@@ -710,12 +730,12 @@ const styles = StyleSheet.create({
     priceCardAmount: { fontSize: 18, fontWeight: '800', color: COLORS.white },
     // Price Calculator
     priceCalcContainer: {
-        marginTop: 6,
-        backgroundColor: 'rgba(255,215,0,0.06)',
+        marginTop: 4,
+        backgroundColor: 'rgba(255,215,0,0.08)',
         borderRadius: RADIUS.lg,
         padding: 16,
-        borderWidth: 1,
-        borderColor: 'rgba(255,215,0,0.15)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255,215,0,0.25)',
     },
     priceCalcHeader: {
         flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,

@@ -21,6 +21,18 @@ export default function PermissionScreen({ onComplete }) {
     const [locationGranted, setLocationGranted] = useState(false);
     const [notificationGranted, setNotificationGranted] = useState(false);
 
+    const handleContinue = () => {
+        if (!locationGranted || !notificationGranted) {
+            Alert.alert(
+                'İzinler Gerekli',
+                'Uygulamayı kullanabilmek için lütfen Konum ve Bildirim izinlerini veriniz.',
+                [{ text: 'Tamam' }]
+            );
+            return;
+        }
+        onComplete();
+    };
+
     const requestLocationPermission = async () => {
         try {
             const { status } = await Location.requestForegroundPermissionsAsync();
@@ -152,7 +164,7 @@ export default function PermissionScreen({ onComplete }) {
 
             {/* Continue Button */}
             <Animated.View entering={FadeInDown.delay(800).duration(400)} style={styles.bottomContainer}>
-                <TouchableOpacity style={styles.continueButton} onPress={onComplete} activeOpacity={0.8}>
+                <TouchableOpacity style={styles.continueButton} onPress={handleContinue} activeOpacity={0.8}>
                     <LinearGradient
                         colors={[COLORS.yellow, '#E5B800']}
                         start={{ x: 0, y: 0 }}
@@ -163,7 +175,7 @@ export default function PermissionScreen({ onComplete }) {
                         <Ionicons name="arrow-forward" size={20} color={COLORS.black} />
                     </LinearGradient>
                 </TouchableOpacity>
-                <Text style={styles.skipHint}>Daha sonra ayarlardan değiştirebilirsiniz</Text>
+                <Text style={styles.skipHint}>Devam etmek için izinler zorunludur</Text>
             </Animated.View>
         </View>
     );
