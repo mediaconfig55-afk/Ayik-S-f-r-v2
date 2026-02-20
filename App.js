@@ -22,7 +22,7 @@ const SCREENS = {
   HOME: 'home',
 };
 
-const STORAGE_KEY = '@ayik_sofor_onboarded';
+const STORAGE_KEY = '@ayik_sofor_onboarding_v2';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState(SCREENS.LOADING);
