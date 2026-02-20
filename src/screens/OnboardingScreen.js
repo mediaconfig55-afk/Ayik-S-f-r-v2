@@ -208,9 +208,6 @@ export default function OnboardingScreen({ onComplete }) {
         }
     };
 
-    const handleSkip = () => {
-        onComplete();
-    };
 
     const onViewableItemsChanged = useRef(({ viewableItems }) => {
         if (viewableItems[0]) {
@@ -225,10 +222,6 @@ export default function OnboardingScreen({ onComplete }) {
                 style={StyleSheet.absoluteFill}
             />
 
-            {/* Skip Button */}
-            <TouchableOpacity style={styles.skipButton} onPress={handleSkip} activeOpacity={0.7}>
-                <Text style={styles.skipText}>Atla</Text>
-            </TouchableOpacity>
 
             {/* Slides */}
             <FlatList

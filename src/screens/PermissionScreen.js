@@ -6,7 +6,9 @@ import {
     TouchableOpacity,
     Platform,
     Alert,
+    AppState
 } from 'react-native';
+import { useEffect } from 'react';
 import Animated, {
     FadeIn,
     FadeInDown,
@@ -21,6 +23,30 @@ import { COLORS, RADIUS } from '../constants/theme';
 export default function PermissionScreen({ onComplete }) {
     const [locationGranted, setLocationGranted] = useState(false);
     const [notificationGranted, setNotificationGranted] = useState(false);
+
+    // Uygulama ayarlarından geri dönüldüğünde izinleri güncelle
+    useEffect(() => {
+        const checkAllPermissions = async () => {
+            const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
+            const { status: notificationStatus } = await Notifications.getPermissionsAsync();
+            setLocationGranted(locationStatus === 'granted');
+            setNotificationGranted(notificationStatus === 'granted');
+        };
+
+        // İlk açılışta kontrol et
+        checkAllPermissions();
+
+        // Arkaplandan geri dönüldüğünde (ayarlar vs.) kontrol et
+        const subscription = AppState.addEventListener('change', nextAppState => {
+            if (nextAppState === 'active') {
+                checkAllPermissions();
+            }
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, []);
 
     const handleContinue = async () => {
         // Permissions check

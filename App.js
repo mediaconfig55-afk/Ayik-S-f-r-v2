@@ -8,6 +8,8 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import PermissionScreen from './src/screens/PermissionScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import { COLORS } from './src/constants/theme';
+import * as Location from 'expo-location';
+import * as Notifications from 'expo-notifications';
 
 // Native splash'ı uygulama hazır olana kadar tut
 ExpoSplashScreen.preventAutoHideAsync();
@@ -43,10 +45,21 @@ export default function App() {
 
   const handleSplashFinish = useCallback(async () => {
     try {
-      const value = await AsyncStorage.getItem(STORAGE_KEY);
-      if (value === 'true') {
+      const onboarded = await AsyncStorage.getItem(STORAGE_KEY);
+
+      // Gerçek izin durumlarını kontrol et
+      const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
+      const { status: notificationStatus } = await Notifications.getPermissionsAsync();
+
+      const hasPermissions = locationStatus === 'granted' && notificationStatus === 'granted';
+
+      if (onboarded === 'true' && hasPermissions) {
         setCurrentScreen(SCREENS.HOME);
+      } else if (onboarded === 'true' && !hasPermissions) {
+        // Tanıtımı geçmiş ama izinleri kapatmış
+        setCurrentScreen(SCREENS.PERMISSIONS);
       } else {
+        // İlk defa açıyor
         setCurrentScreen(SCREENS.ONBOARDING);
       }
     } catch (e) {
