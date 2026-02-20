@@ -55,6 +55,7 @@ export default function App() {
   }, []);
 
   const handleOnboardingComplete = useCallback(() => {
+    // Smooth transition
     setCurrentScreen(SCREENS.PERMISSIONS);
   }, []);
 

@@ -15,21 +15,43 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
+import * as Linking from 'expo-linking';
 import { COLORS, RADIUS } from '../constants/theme';
 
 export default function PermissionScreen({ onComplete }) {
     const [locationGranted, setLocationGranted] = useState(false);
     const [notificationGranted, setNotificationGranted] = useState(false);
 
-    const handleContinue = () => {
-        if (!locationGranted || !notificationGranted) {
+    const handleContinue = async () => {
+        // Permissions check
+        const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
+        const { status: notificationStatus } = await Notifications.getPermissionsAsync();
+
+        const isLocationGranted = locationStatus === 'granted';
+        const isNotificationGranted = notificationStatus === 'granted';
+
+        // Update state to match actual status
+        if (isLocationGranted !== locationGranted) setLocationGranted(isLocationGranted);
+        if (isNotificationGranted !== notificationGranted) setNotificationGranted(isNotificationGranted);
+
+        // Strict Blocking Logic: BOTH Location and Notification are MANDATORY
+        if (!isLocationGranted || !isNotificationGranted) {
+            let errorMessage = 'Uygulamayı kullanabilmek için aşağıdaki izinlerin verilmesi ZORUNLUDUR:\n';
+            if (!isLocationGranted) errorMessage += '- Konum İzni\n';
+            if (!isNotificationGranted) errorMessage += '- Bildirim İzni';
+
             Alert.alert(
-                'İzinler Gerekli',
-                'Uygulamayı kullanabilmek için lütfen Konum ve Bildirim izinlerini veriniz.',
-                [{ text: 'Tamam' }]
+                'İzinler Eksik',
+                errorMessage,
+                [
+                    { text: 'İptal', style: 'cancel' },
+                    { text: 'Ayarları Aç', onPress: () => Linking.openSettings() }
+                ]
             );
             return;
         }
+
+        // Proceed only if BOTH are granted
         onComplete();
     };
 
@@ -39,11 +61,18 @@ export default function PermissionScreen({ onComplete }) {
             if (status === 'granted') {
                 setLocationGranted(true);
             } else {
-                Alert.alert(
-                    'Konum İzni',
-                    'Konum izni verilmedi. Ayarlardan etkinleştirebilirsiniz.',
-                    [{ text: 'Tamam' }]
-                );
+                // If denied, check if we can ask again or if it's permanent
+                const { canAskAgain } = await Location.getForegroundPermissionsAsync();
+                if (!canAskAgain) {
+                    Alert.alert(
+                        'Konum İzni',
+                        'Konum izni kalıcı olarak reddedildi. Uygulamayı kullanmak için ayarlardan etkinleştirmeniz gerekmektedir.',
+                        [
+                            { text: 'Vazgeç', style: 'cancel' },
+                            { text: 'Ayarları Aç', onPress: () => Linking.openSettings() }
+                        ]
+                    );
+                }
             }
         } catch (e) {
             console.log('Location permission error:', e);
@@ -56,10 +85,13 @@ export default function PermissionScreen({ onComplete }) {
             if (status === 'granted') {
                 setNotificationGranted(true);
             } else {
+                // If denied, alert user strictly
                 Alert.alert(
-                    'Bildirim İzni',
-                    'Bildirim izni verilmedi. Ayarlardan etkinleştirebilirsiniz.',
-                    [{ text: 'Tamam' }]
+                    'Bildirim İzni Gerekli',
+                    'Bildirim izni zorunludur. Lütfen izin veriniz.',
+                    [
+                        { text: 'Tamam' }
+                    ]
                 );
             }
         } catch (e) {

@@ -163,6 +163,28 @@ export default function HomeScreen() {
 
     const priceEstimate = estimatedKm ? calculatePrice(parseFloat(estimatedKm) || 0) : null;
 
+    const handleResetIntro = useCallback(() => {
+        Alert.alert(
+            'Intro Reset',
+            'Tanıtım ekranlarını tekrar görmek istiyor musunuz? Uygulama yeniden başlatılacak.',
+            [
+                { text: 'Hayır', style: 'cancel' },
+                {
+                    text: 'Evet',
+                    onPress: async () => {
+                        try {
+                            const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+                            await AsyncStorage.removeItem('@ayik_sofor_onboarded');
+                            Alert.alert('Sıfırlandı', 'Lütfen uygulamayı kapatıp tekrar açın.');
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+                }
+            ]
+        );
+    }, []);
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor={COLORS.black} />
@@ -286,8 +308,10 @@ export default function HomeScreen() {
                 <Text style={styles.aboutButtonText}>Hakkında & Gizlilik</Text>
             </TouchableOpacity>
 
-            {/* Footer */}
-            <Text style={styles.footer}>v1.0.0 • 2026</Text>
+            {/* Footer - Long Press to Reset */}
+            <TouchableOpacity activeOpacity={1} onLongPress={handleResetIntro}>
+                <Text style={styles.footer}>v1.0.0 • 2026</Text>
+            </TouchableOpacity>
 
             {/* Request Modal */}
             <RequestModal
