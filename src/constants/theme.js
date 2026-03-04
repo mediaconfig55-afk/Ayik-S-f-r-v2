@@ -44,12 +44,12 @@ export const FONTS = {
     extraBold: { fontWeight: '800' },
 };
 
-export const WHATSAPP_NUMBER = '905442946570';
+export const WHATSAPP_NUMBER = '905066632179';
 export const APP_NAME = 'AYIK ŞOFÖR';
 export const APP_NAME_FIRST = 'AYIK';
 export const APP_NAME_LAST = 'ŞOFÖR';
 export const APP_SUBTITLE = 'Premium Şoför Hizmeti';
-export const GITHUB_APK_URL = 'https://github.com/mediaconfig55-afk/ayik-sofor-app/releases';
+export const GITHUB_APK_URL = 'https://xn--ayksofr-f1a04c.com.tr/';
 
 export const PRICE_CONFIG = {
     base: 500,        // 0-5 KM açılış ücreti (₺)

@@ -257,7 +257,7 @@ export default function HomeScreen() {
                 </Animated.View>
 
                 {/* Call Driver Button */}
-                <Animated.View style={[{ width: '100%' }, buttonsAnimStyle]}>
+                <Animated.View style={[styles.buttonsContainer, buttonsAnimStyle]}>
                     <TouchableOpacity
                         style={styles.callButton}
                         activeOpacity={0.8}
@@ -345,7 +345,7 @@ export default function HomeScreen() {
                             <Ionicons name="call" size={40} color={COLORS.yellow} />
                         </LinearGradient>
                         <Text style={styles.callModalTitle}>Şoförü Ara</Text>
-                        <Text style={styles.callModalNumber}>+90 544 294 65 70</Text>
+                        <Text style={styles.callModalNumber}>+90 506 663 21 79</Text>
                         <Text style={styles.callModalHint}>Bu numarayı aramak istediğinize emin misiniz?</Text>
 
                         <View style={styles.callModalActions}>
@@ -613,6 +613,9 @@ const styles = StyleSheet.create({
     },
     heroLabelText: {
         fontSize: 11, fontWeight: '700', color: COLORS.white, letterSpacing: 3,
+    },
+    buttonsContainer: {
+        width: '100%',
     },
     callButton: {
         width: '100%', marginBottom: 16,
