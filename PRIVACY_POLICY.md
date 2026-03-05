@@ -38,4 +38,4 @@ Bilgilerinizi korumak için endüstri standardı güvenlik önlemleri alıyoruz.
 
 Bu Gizlilik Politikası hakkında sorularınız varsa, lütfen bizimle iletişime geçin:
 **E-posta:** info@ayiksofor.com
-**Telefon:** +90 544 294 65 70
+**Telefon:** +90 506 663 21 79
